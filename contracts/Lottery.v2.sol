@@ -4,6 +4,7 @@ pragma solidity ^0.8.9;
  
 contract Lottery {
   address public manager;
+  address public previousWinner;
   address[] public players;
   
   constructor() {
@@ -16,15 +17,19 @@ contract Lottery {
     players.push(msg.sender);
   }
 
-  // v2 change: returns the address of the winner
-  function pickWinner() public forManagerOnly returns (address) {
+  function pickWinner() public forManagerOnly {
     address winner = players[random() % players.length];
-    
+
     payable(winner).transfer(address(this).balance);
 
-    resetContractState();
+    previousWinner = winner;
 
-    return winner
+    resetContractState();
+  }
+
+  // v2 change: returns the address of the previous winner
+  function getWinner() public forManagerOnly returns (address) {
+    return previousWinner;
   }
 
   function getPlayers() public view returns (address[] memory) {

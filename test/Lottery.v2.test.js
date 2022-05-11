@@ -27,6 +27,10 @@ describe("Lottery", () => {
     assert.equal(manager, await lottery.methods.manager().call())
   })
 
+  it('has a previousWinner set to null', async () => {
+    assert.equal(await lottery.methods.previousWinner().call(), '0x0000000000000000000000000000000000000000')
+  })
+
   it('allows one account to enter', async () => {
     const playerToEnter = accounts[0]
 
@@ -34,7 +38,7 @@ describe("Lottery", () => {
 
     const players = await lottery.methods.getPlayers().call();
 
-    assert.equal(players.length,1)
+    assert.equal(players.length, 1)
     assert.equal(playerToEnter, players[0])
   })
 
@@ -73,10 +77,9 @@ describe("Lottery", () => {
       assert(false);
     }
 
-    catch(e) { assert(e); }
+    catch (e) { assert(e); }
   })
 
-  // pickWinner doesn't tests the randomness of the random method
   it('pickWinner sends money to the winner', async () => {
     const winningPlayer = accounts[0]
 
@@ -100,6 +103,13 @@ describe("Lottery", () => {
     const players = await lottery.methods.getPlayers().call();
 
     assert(players.length == 0)
+  })
+
+  // v2 updates
+  it('pickWinner sets the previousWinner', async () => {
+    await lottery.methods.pickWinner().send({ from: manager, value: web3.utils.toWei('0.0001', 'ether') })
+    
+    assert.notEqual(await lottery.methods.previousWinner().call(), '0x0000000000000000000000000000000000000000')
   })
 
 })
